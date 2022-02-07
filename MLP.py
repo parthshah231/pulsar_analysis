@@ -24,8 +24,10 @@ class MLPLightning(LightningModule):
         self.linear2 = Linear(32, self.out_features)
 
     def forward(self, x):
-        x = self.relu(self.linear1(x))
-        out = self.sigmoid(self.linear2(x))
+        x = self.linear1(x)
+        x = self.relu(x)
+        x = self.linear2(x)
+        out = self.sigmoid(x)
         return out
 
     def training_step(self, batch: Tuple[Tensor, Tensor], *args, **kwargs) -> Tensor:
@@ -33,6 +35,9 @@ class MLPLightning(LightningModule):
 
     def validation_step(self, batch: Tuple[Tensor, Tensor], *args, **kwargs) -> Tensor:
         return self._shared_step(batch, "val")
+
+    def test_step(self, batch: Tuple[Tensor, Tensor], *args, **kwargs) -> Tensor:
+        return self._shared_step(batch, "test")
 
     def _shared_step(self, batch: Tuple[Tensor, Tensor], phase: str) -> Tensor:
         # x : [batch_size, in_features]
