@@ -1,6 +1,5 @@
-from typing import Any, Tuple
+from typing import Tuple
 
-from numpy import ndarray
 from pytorch_lightning import LightningModule
 from torch import Tensor
 from torch.nn import Linear, MSELoss, ReLU, Sigmoid
