@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 
+import numpy as np
 import pandas as pd
 from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader
@@ -15,8 +16,8 @@ BATCH_SIZE = 10
 def test_MLP():
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
-    args = parser.parse_args(["--gpus=0", "--max_epochs=1", "--val_check_interval=500"])
-    train_dataset, val_dataset, test_dataset = return_datasets(df)
+    args = parser.parse_args(["--gpus=0", "--max_epochs=3", "--val_check_interval=500"])
+    train_dataset, val_dataset, test_dataset, targets = return_datasets(df)
 
     in_features = len(train_dataset[0][0])
     train_dataloader = DataLoader(
@@ -37,7 +38,7 @@ def test_MLP():
 
     test_dataloader = DataLoader(
         test_dataset,
-        batch_size=BATCH_SIZE,
+        batch_size=1,
         shuffle=False,
         num_workers=2,
         drop_last=False,
@@ -48,7 +49,11 @@ def test_MLP():
     trainer.fit(
         model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader
     )
-    trainer.test(model, test_dataloader)
+    results = trainer.predict(model, test_dataloader)
+    results = np.hstack(results)
+    ones = results > 0.5
+    acc = (ones == targets).mean()
+    print(acc)
 
 
 if __name__ == "__main__":

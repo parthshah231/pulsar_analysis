@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -21,6 +21,18 @@ class PulsarDataset(Dataset):
         return self.n_samples
 
 
+class TestDataset(Dataset):
+    def __init__(self, X: np.ndarray) -> None:
+        self.X = X
+        self.n_samples = self.X.shape[0]
+
+    def __getitem__(self, index: int) -> Tuple[np.ndarray]:
+        return self.X[index]
+
+    def __len__(self) -> int:
+        return self.n_samples
+
+
 def return_datasets(df: pd.DataFrame) -> Tuple[Dataset, Dataset, Dataset]:
     X = np.array(df.drop(["Classifier"], 1), dtype=np.float32)
     y = np.array(df["Classifier"], dtype=np.float32)
@@ -38,6 +50,6 @@ def return_datasets(df: pd.DataFrame) -> Tuple[Dataset, Dataset, Dataset]:
 
     train_dataset = PulsarDataset(X_train, y_train)
     val_dataset = PulsarDataset(X_val, y_val)
-    test_dataset = PulsarDataset(X_test, y_test)
+    test_dataset = TestDataset(X_test)
 
-    return train_dataset, val_dataset, test_dataset
+    return train_dataset, val_dataset, test_dataset, y_test

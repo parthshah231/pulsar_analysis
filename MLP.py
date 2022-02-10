@@ -1,8 +1,9 @@
-from typing import Tuple
+from typing import Any, Optional, Tuple
 
+from numpy import ndarray
 from pytorch_lightning import LightningModule
 from torch import Tensor
-from torch.nn import Linear, MSELoss, ReLU, Sigmoid
+from torch.nn import BCELoss, Linear, ReLU, Sigmoid
 from torch.optim import Adam
 from torchmetrics.functional import mean_absolute_error
 
@@ -17,6 +18,7 @@ class MLPLightning(LightningModule):
         self.save_hyperparameters()
         self.in_features = in_features
         self.out_features = out_features
+        self.bce = BCELoss()
         self.relu = ReLU()
         self.sigmoid = Sigmoid()
         self.linear1 = Linear(self.in_features, 32)
@@ -35,8 +37,12 @@ class MLPLightning(LightningModule):
     def validation_step(self, batch: Tuple[Tensor, Tensor], *args, **kwargs) -> Tensor:
         return self._shared_step(batch, "val")
 
-    def test_step(self, batch: Tuple[Tensor, Tensor], *args, **kwargs) -> Tensor:
-        return self._shared_step(batch, "test")
+    def predict_step(
+        self, batch: Any, batch_idx: int, dataloader_idx: Optional[int] = None
+    ) -> Tuple[ndarray, ndarray]:
+        x = batch
+        pred = self(x).squeeze().numpy()
+        return pred
 
     def _shared_step(self, batch: Tuple[Tensor, Tensor], phase: str) -> Tensor:
         # x : [batch_size, in_features]
@@ -45,10 +51,8 @@ class MLPLightning(LightningModule):
         # target: [batch_size] -> [batch_size, 1]
         target = target.unsqueeze(-1)
         pred = self(x)
-        mae = mean_absolute_error(pred, target)
-        loss = MSELoss()(pred, target)
-        self.log(f"{phase}/mae", mae, prog_bar=True)
-        self.log(f"{phase}/mse", loss, prog_bar=True)
+        loss = self.bce(pred, target)
+        self.log(f"{phase}/bce", loss, prog_bar=True)
         return loss
 
     def configure_optimizers(self):
