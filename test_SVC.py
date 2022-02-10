@@ -12,6 +12,7 @@ from constants import DATA, TEST_RATIO
 
 
 def prepare_data() -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Returns data in the form of training and testing data."""
     df = pd.read_csv(DATA / "HTRU_2.csv")
     X = np.array(df.drop(["Classifier"], 1), dtype=np.float32)
     y = np.array(df["Classifier"], dtype=np.float32)
@@ -31,6 +32,7 @@ def prepare_data() -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 def test_SVC(
     X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, y_test: np.ndarray
 ) -> None:
+    """Shows accuracy and classification w.r.t SVC"""
     svm_rbf = SVC(kernel="rbf")
     svm_rbf.fit(X_train, y_train)
     svm_rbf_pred = svm_rbf.predict(X_test)

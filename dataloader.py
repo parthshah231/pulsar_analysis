@@ -11,19 +11,25 @@ from constants import TEST_RATIO, VAL_RATIO
 
 
 class PulsarDataset(Dataset):
+    """Prepares custom training and validation dataset for PyTorch Lighning"""
+
     def __init__(self, X: np.ndarray, y: np.ndarray) -> None:
         self.X = X
         self.y = y
         self.n_samples = self.X.shape[0]
 
     def __getitem__(self, index: int) -> Tuple[np.ndarray, np.float16]:
+        """Enables access to dataset with the help of index"""
         return self.X[index], self.y[index]
 
     def __len__(self) -> int:
+        """Returns the length of dataset"""
         return self.n_samples
 
 
 class TestDataset(Dataset):
+    """Prepares custom testing dataset for PyTorch Lighning"""
+
     def __init__(self, X: np.ndarray) -> None:
         self.X = X
         self.n_samples = self.X.shape[0]
@@ -38,6 +44,7 @@ class TestDataset(Dataset):
 def return_datasets(
     df: pd.DataFrame, perform_smote: bool = False
 ) -> Tuple[Dataset, Dataset, Dataset]:
+    """Returns training, validation and testing dataset for MLP model"""
     X = np.array(df.drop(["Classifier"], 1), dtype=np.float32)
     y = np.array(df["Classifier"], dtype=np.float32)
 

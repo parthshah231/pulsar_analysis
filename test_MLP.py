@@ -57,11 +57,11 @@ def test_MLP():
     results = trainer.predict(model, test_dataloader)
     results = np.hstack(results)
     ones = results > 0.5
-    acc = (ones == targets).mean()
+    accuracy = (ones == targets).mean()
     matrix = confusion_matrix(targets, ones)
     sns.heatmap(matrix, annot=True)
     plt.show()
-    print(acc)
+    print(f"Accuracy for MLP model: {accuracy}")
 
 
 if __name__ == "__main__":
