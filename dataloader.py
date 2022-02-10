@@ -2,7 +2,9 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
+from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import train_test_split
+from torch import rand
 from torch.utils.data import Dataset
 
 from constants import TEST_RATIO, VAL_RATIO
@@ -33,13 +35,21 @@ class TestDataset(Dataset):
         return self.n_samples
 
 
-def return_datasets(df: pd.DataFrame) -> Tuple[Dataset, Dataset, Dataset]:
+def return_datasets(
+    df: pd.DataFrame, perform_smote: bool = False
+) -> Tuple[Dataset, Dataset, Dataset]:
     X = np.array(df.drop(["Classifier"], 1), dtype=np.float32)
     y = np.array(df["Classifier"], dtype=np.float32)
 
-    X_remaining, X_test, y_remaining, y_test = train_test_split(
-        X, y, test_size=TEST_RATIO
-    )
+    if perform_smote:
+        X_resampled, y_resampled = SMOTE(random_state=43).fit_resample(X, y)
+        X_remaining, X_test, y_remaining, y_test = train_test_split(
+            X_resampled, y_resampled, test_size=TEST_RATIO
+        )
+    else:
+        X_remaining, X_test, y_remaining, y_test = train_test_split(
+            X, y, test_size=TEST_RATIO
+        )
 
     ratio_remaining = 1 - TEST_RATIO
     ratio_val_adjusted = VAL_RATIO / ratio_remaining

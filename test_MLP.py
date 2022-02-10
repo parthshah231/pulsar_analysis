@@ -1,8 +1,11 @@
 from argparse import ArgumentParser
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from pytorch_lightning import Trainer
+from sklearn.metrics import confusion_matrix
 from torch.utils.data import DataLoader
 
 from constants import DATA
@@ -17,7 +20,9 @@ def test_MLP():
     parser = ArgumentParser()
     parser = Trainer.add_argparse_args(parser)
     args = parser.parse_args(["--gpus=0", "--max_epochs=3", "--val_check_interval=500"])
-    train_dataset, val_dataset, test_dataset, targets = return_datasets(df)
+    train_dataset, val_dataset, test_dataset, targets = return_datasets(
+        df, perform_smote=False
+    )
 
     in_features = len(train_dataset[0][0])
     train_dataloader = DataLoader(
@@ -53,6 +58,9 @@ def test_MLP():
     results = np.hstack(results)
     ones = results > 0.5
     acc = (ones == targets).mean()
+    matrix = confusion_matrix(targets, ones)
+    sns.heatmap(matrix, annot=True)
+    plt.show()
     print(acc)
 
 
